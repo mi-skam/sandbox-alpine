@@ -10,48 +10,234 @@
       defer
       src="https://unpkg.com/alpinejs@3.10.2/dist/cdn.min.js"
     ></script>
+    <script src="https://livejs.com/live.js"></script>
     <script src="app.js"></script>
   </head>
   <body>
     <!-- x-data, x-text, x-html -->
+    <div x-data="{name: 'plumps', message: 'Hello <b>World</b>'}">
+      <p x-text="name"></p>
+      <p x-html="message"></p>
+    </div>
 
+    <div
+      x-data
+      x-text="await (await fetch('https://jsonplaceholder.typicode.com/todos/1')).text()"
+    ></div>
     <!-- x-data with methods -->
+    <div
+      x-data="{
+      message: 'clicked',
+      change() {
+        this.message = 'changed'
+      }
+    }"
+    >
+      <span x-text="message" @click="change"></span>
+    </div>
 
     <!-- Re-usable Data -->
+    <div
+      x-data="{
+        open: false,
+        toggleMenu() {
+          this.open = !this.open
+        }
+      }"
+    >
+      <button @click="toggleMenu">Menu</button>
+      <div class="content" x-show="open">Content...</div>
+    </div>
+
+    <br />
+    <!-- using the Alpine.data definition in app. -->
+    <div x-data="dropdown">
+      <button @click="toggleMenu">Menu 2</button>
+      <div class="content" x-show="open">Content...</div>
+    </div>
 
     <!-- Data-Less components -->
+    <br />
+    <div x-data @click="alert('clicked')">Click me!</div>
 
     <!-- Data coming from Store -->
 
-    <!-- x-init -->
+    <div x-data x-text="$store.currentUser.posts"></div>
 
+    <!-- x-init, helpful for fetching data -->
+
+    <div
+      x-data="{todo: {}}"
+      x-init="todo = await (await fetch('https://jsonplaceholder.typicode.com/todos/1')).json()"
+    >
+      <p x-text="todo.title"></p>
+    </div>
     <!-- Scoping -->
+
+    <!-- 
+      It's like normal JS, the more specific the code, the higher the priority of the value.
+     -->
 
     <!-- Getters & Setters -->
 
+    <div
+      x-data="{
+      open: false,
+      get isOpen() {
+        return this.open
+      },
+      set isOpen(open) {
+        this.open = open
+      },
+      toggle() {
+        this.isOpen = !this.isOpen
+      }
+    }"
+    >
+      <button @click="toggle">Open/Close (getters/setters)</button>
+      <div x-show="open">Content</div>
+    </div>
+
+    <br />
     <!-- x-show & x-transition -->
+    <div
+      x-data="{
+    open: false,
+    toggle() {
+      this.open = !this.open
+    }
+  }"
+    >
+      <button @click="toggle">Open/Close (x-show/x-transition)</button>
+      <div x-show="open" x-transition:enter-duration:200ms>Content</div>
+    </div>
 
-    <!-- x-if -->
+    <!-- x-if (only works in template script) -->
+    <br />
+    <div
+      x-data="{
+  open: false,
+  toggle() {
+    this.open = !this.open
+  }
+}"
+    >
+      <button @click="toggle">Open/Close (x-if)</button>
+      <template x-if="open">
+        <div>Content</div>
+      </template>
+    </div>
 
-    <!-- x-for -->
+    <!-- x-for (only works in template tag) -->
+    <div
+      x-data="{
+        posts: [{'id': 1, 'author': 'plumps' }, {'id': 2, 'author': 'mi-skam'}]
+      }"
+    >
+      <template x-for="p in posts" :key="p.id">
+        <p x-text="p.author"></p>
+      </template>
+    </div>
 
     <!-- x-for in range -->
 
+    <!-- x-bind  allows you to set HTML attributes on elements based on the result of JavaScript expressions. -->
+
+    <div x-data="{ placeholder: 'placeholder' }">
+      <input type="text" :placeholder="placeholder" />
+    </div>
+
+    <br />
     <!-- x-bind: class  -->
 
+    <div x-data="{ open: false}">
+      <button x-on:click="open = !open">Toggle</button>
+
+      <div class="yellow" :class="open || 'hidden'">Dropdown Contents</div>
+    </div>
+
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+
+    <br />
+    <!-- x-bind: class (class object syntax)  -->
+
+    <div x-data="{ open: false}">
+      <button x-on:click="open = !open">Toggle</button>
+
+      <div class="yellow" :class="{'hidden': !open }">Dropdown Contents</div>
+    </div>
+
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+
     <!-- x-bind: style -->
+    <div></div>
 
     <!-- x-bind id -->
 
+    <br />
     <!-- Challenge -->
+
+    <!-- my solution -->
     <div x-data="{colors: ['red', 'green', 'blue']}">
       <!-- Iterate over colors and display 40x40 px boxes with given colors -->
+      <template x-for="c in colors" :key="c[0]">
+        <div class="box" :class="c"></div>
+      </template>
     </div>
 
+    <style>
+      .box {
+        width: 40px;
+        height: 40px;
+      }
+      .red {
+        background-color: red;
+      }
+      .green {
+        background-color: greenyellow;
+      }
+      .blue {
+        background-color: blue;
+      }
+    </style>
+
+    <br />
+    <!-- second solution -->
+    <div x-data="{colors: ['red', 'green', 'blue']}">
+      <!-- Iterate over colors and display 40x40 px boxes with given colors -->
+      <template x-for="c in colors" :key="c[0]">
+        <div
+          style="width: 40px; height: 40px"
+          :style="{backgroundColor: c}"
+        ></div>
+      </template>
+    </div>
+    <br />
     <!-- x-on -->
+    <div x-data>
+      <button @click="console.log($event)">Click (x-on)</button>
+    </div>
 
+    <br />
     <!-- x-model -->
-
+    <div x-data="{input: null}">
+      <input
+        type="text"
+        name="xmodel_example"
+        id="xme"
+        placeholder="placeholder"
+        x-model.debounce="input"
+      />
+      <p x-text="input"></p>
+    </div>
     <!-- 
         Challenge: Create a button and 3 inputs. 
         1st input for text. Whatever you write inside the input that should become
@@ -59,16 +245,61 @@
         2nd input for background color. Whatever you type color inside the input and that will become button background color
         3rd input for button id. Whatever you type inside that will become button id
     -->
+    <br />
+    <div
+      x-data="{
+      buttonText: 'Change me!!!',
+      buttonBg: null,
+      buttonId: 1
+    }"
+    >
+      <button
+        x-text="buttonText"
+        :style="{backgroundColor: buttonBg}"
+        :id="buttonId"
+      ></button>
+      <br />
+      <input type="text" x-model.debounce="buttonText" />
+      <input type="text" x-model.debounce="buttonBg" />
+      <input type="text" x-model.debounce="buttonId" />
+    </div>
 
     <!-- x-effect -->
+    <br />
+    <div x-data="{ label: 'Hello' }" x-effect="console.log(label)">
+      <button @click="label += ' World!'">Change Message</button>
+    </div>
 
     <!-- x-ignore -->
 
     <!-- x-ref -->
+    <br />
+    <div x-data>
+      <button @click="$refs.text.remove()">Remove Text</button>
 
-    <!-- x-cloak -->
+      <span x-ref="text">Hello 👋</span>
+    </div>
+
+    <!-- x-cloak (needs a css setting to work!) -->
+    <div x-data>
+      <span x-cloak x-show="false"
+        >This will not 'blip' onto screen at any point</span
+      >
+    </div>
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
 
     <!-- x-teleport -->
+    <div x-data="{ open: false }">
+      <button @click="open = ! open">Toggle Modal</button>
+
+      <template x-teleport="body">
+        <div x-show="open">Modal contents...</div>
+      </template>
+    </div>
 
     <!-- Magic Properties -->
     <!-- $el -->
